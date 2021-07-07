@@ -9,7 +9,6 @@ public class testCode {
 		//board.printRealBoard();
 		//board.printPlayerBoard();
 		//board.printMinesNear();
-		
 		board.Play(board);
 	}
 	
