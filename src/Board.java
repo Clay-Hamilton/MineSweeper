@@ -123,12 +123,8 @@ public class Board extends JFrame {
 		}
 	}
 	
-	public boolean isLegalMove(int num, boolean isX) {
-		int length;
-		if (isX) length = xlength;
-		else length = ylength;
-		
-		if (num < 0 || num >= length) return false;
+	public boolean isLegalMove(int x, int y) {
+		if (x < 0 || y < 0 || x >= xlength || y >= ylength) return false;
 		
 		return true;
 	}
@@ -138,6 +134,8 @@ public class Board extends JFrame {
 		int xresponse = 0;
 		int yresponse = 0;
 		int squaresleft = xlength * ylength - numMines;
+		String response = "";
+		String[] responses = new String[2];
 		boolean gameWon = false;
 		/*
 		System.out.println("Enter Dimensions:");
@@ -147,18 +145,19 @@ public class Board extends JFrame {
 		 */
 		while(!gameWon) {
 			board.printPlayerBoard();
-			System.out.println("Select an X Coordinate (starting at 0, of course :) ):");
-			xresponse = scan.nextInt();
-			if (!isLegalMove(xresponse, true)) {
-				System.out.println("Illegal Move: Keep your answer within bounds!");
+			
+			System.out.println("Select an X and Y coordinate, surrounded by a space.");
+			response = scan.nextLine();
+			responses = response.split(" ");
+			xresponse = Integer.parseInt(responses[0]);
+			yresponse = Integer.parseInt(responses[1]);
+			System.out.println(responses[0] + " " + responses[1]);
+			
+			if (!isLegalMove(xresponse, yresponse)) {
+				System.out.println("Illegal Move: Keep your answer between 0 and " + xlength + " for the first number and 0 and " + ylength + " for the second!");
 				continue;
 			}
-			System.out.println("Select a Y Coordinate:");
-			yresponse = scan.nextInt();
-			if (!isLegalMove(yresponse, false)) {
-				System.out.println("Illegal Move: Keep your answer within bounds!");
-				continue;
-			}
+			
 			//check if the selected square was already picked:
 			if(board.playerBoardArray[xresponse][yresponse] != 'X') {
 				System.out.println("You already picked that square!");
@@ -187,6 +186,7 @@ public class Board extends JFrame {
 				
 				board.printPlayerBoard();
 				System.out.println("You Win!");
+				System.exit(0);
 			}
 			
 		}
