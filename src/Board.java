@@ -9,7 +9,7 @@ public class Board extends JFrame {
 	private int numMines;
 	Cell[][] realBoardArray;
 	char[][] playerBoardArray;
-//	int[][] minesNearBoardArray;
+	//	int[][] minesNearBoardArray;
 	Scanner scan = new Scanner(System.in);
 	Random gen = new Random();
 
@@ -50,7 +50,7 @@ public class Board extends JFrame {
 		numMines = mines;
 		realBoardArray = new Cell[x][y];
 		playerBoardArray = new char[x][y];
-		
+
 		//generate board places for mines:
 		for (int i = 0; i < realBoardArray.length; i++) {
 			for (int j = 0; j < realBoardArray.length; j++) {
@@ -59,11 +59,11 @@ public class Board extends JFrame {
 		}
 		genMines(mines);
 		//hardcode mines for now:
-//		realBoardArray[0][0].setMine(true);
-//		realBoardArray[1][1].setMine(true);
-//		realBoardArray[2][2].setMine(true);
-//		realBoardArray[3][3].setMine(true);
-//		realBoardArray[4][4].setMine(true);
+		//		realBoardArray[0][0].setMine(true);
+		//		realBoardArray[1][1].setMine(true);
+		//		realBoardArray[2][2].setMine(true);
+		//		realBoardArray[3][3].setMine(true);
+		//		realBoardArray[4][4].setMine(true);
 
 		//generate board that player sees:
 		for (int i = 0; i < playerBoardArray.length; i++) {
@@ -73,10 +73,10 @@ public class Board extends JFrame {
 		}
 
 	}
-	
+
 	public int getMinesNear(int x, int y) {
 		int count = 0;
-		
+
 		//check for edge of board:
 		//upper left:
 		if (isLegalMove(x-1, y-1)) {
@@ -107,7 +107,7 @@ public class Board extends JFrame {
 		}
 		return count;
 	}
-	
+
 	public void genMines(int numMines) {
 		int randomx = 0;
 		int randomy = 0;
@@ -120,10 +120,10 @@ public class Board extends JFrame {
 			else i++;
 		}
 	}
-	
+
 	public boolean isLegalMove(int x, int y) {
 		if (x < 0 || y < 0 || x >= xlength || y >= ylength) return false;
-		
+
 		return true;
 	}
 
@@ -135,6 +135,7 @@ public class Board extends JFrame {
 		String response = "";
 		String[] responses = new String[2];
 		boolean gameWon = false;
+		boolean firstMove = true;
 		/*
 		System.out.println("Enter Dimensions:");
 		int x = scan.nextInt();
@@ -143,51 +144,59 @@ public class Board extends JFrame {
 		 */
 		while(!gameWon) {
 			board.printPlayerBoard();
-			
+
 			//scan for player's entered move:
 			System.out.println("Select an X and Y coordinate, surrounded by a space.");
 			response = scan.nextLine();
 			responses = response.split(" ");
 			xresponse = Integer.parseInt(responses[0]);
 			yresponse = Integer.parseInt(responses[1]);
-						
+
 			//check if move is legal:
 			if (!isLegalMove(xresponse, yresponse)) {
 				System.out.println("Illegal Move: Keep your answer between 0 and " + xlength + " for the first number and 0 and " + ylength + " for the second!");
 				continue;
 			}
-			
+
 			//check if the selected square was already picked:
 			if(board.playerBoardArray[xresponse][yresponse] != 'X') {
 				System.out.println("You already picked that square!");
 				continue;
 			}
-			
+
+
 			//if the player hits a mine, game over
 			if (board.realBoardArray[xresponse][yresponse].isMine()) {
-				board.playerBoardArray[xresponse][yresponse] = '*';
-				board.printPlayerBoard();
-				System.exit(0);
+				//if it's the first move, move the mine so they don't die immediately:
+				if (squaresleft == xlength * ylength - numMines) {
+					board.realBoardArray[xresponse][yresponse].setMine(false);
+					genMines(1);
+				}
+				else { //otherwise they die:
+					board.playerBoardArray[xresponse][yresponse] = '*';
+					board.printPlayerBoard();
+					System.exit(0);
+				}
 			}
-			else board.playerBoardArray[xresponse][yresponse] = Character.forDigit(getMinesNear(xresponse, yresponse), 10);
-			
+			board.playerBoardArray[xresponse][yresponse] = Character.forDigit(getMinesNear(xresponse, yresponse), 10);
+
 			//check for winning condition:
 			squaresleft--;
 			if (squaresleft == 0) {
 				gameWon = true;
-				
+
 				//reveal all mines:
 				for (int i = 0; i < xlength; i++) {
 					for (int j = 0; j < ylength; j++) {
 						if(board.playerBoardArray[i][j] == 'X') board.playerBoardArray[i][j] = '*';
 					}
 				}
-				
+
 				board.printPlayerBoard();
 				System.out.println("You Win!");
 				System.exit(0);
 			}
-			
+
 		}
 
 
