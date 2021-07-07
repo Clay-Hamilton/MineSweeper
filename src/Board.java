@@ -9,7 +9,7 @@ public class Board extends JFrame {
 	private int numMines;
 	Cell[][] realBoardArray;
 	char[][] playerBoardArray;
-	int[][] minesNearBoardArray;
+//	int[][] minesNearBoardArray;
 	Scanner scan = new Scanner(System.in);
 	Random gen = new Random();
 
@@ -37,7 +37,7 @@ public class Board extends JFrame {
 	public void printMinesNear() {
 		for (int i = 0; i < xlength; i++) {
 			for (int j = 0; j < ylength; j++) {
-				System.out.print(realBoardArray[i][j].getMinesNear() + " ");
+				System.out.print(getMinesNear(i,j) + " ");
 			}
 			System.out.println();
 		}
@@ -50,7 +50,7 @@ public class Board extends JFrame {
 		numMines = mines;
 		realBoardArray = new Cell[x][y];
 		playerBoardArray = new char[x][y];
-		minesNearBoardArray = new int[x][y];
+		
 		//generate board places for mines:
 		for (int i = 0; i < realBoardArray.length; i++) {
 			for (int j = 0; j < realBoardArray.length; j++) {
@@ -72,44 +72,42 @@ public class Board extends JFrame {
 			}
 		}
 
-		//generate minesNear for each Cell:
-		for (int i = 0; i < xlength; i++) {
-			for (int j = 0; j < ylength; j++) {
-				int count = 0;
-				
-				//check for edge of board:
-				//upper left:
-				if (i-1 >= 0 && j-1 >= 0) {
-					if (realBoardArray[i-1][j-1].isMine()) count++;
-				}
-				//upper middle:
-				if (j-1 >= 0) {
-					if (realBoardArray[i][j-1].isMine()) count++;
-				}
-				//you get the point:
-				if (i+1 < xlength && j-1 >= 0) {
-					if (realBoardArray[i+1][j-1].isMine()) count++;
-				}
-				if (i-1 >= 0) {
-					if (realBoardArray[i-1][j].isMine()) count++;
-				}
-				if (i+1 < xlength) {
-					if (realBoardArray[i+1][j].isMine()) count++;
-				}
-				if (i-1 >= 0 && j+1 < ylength) {
-					if (realBoardArray[i-1][j+1].isMine()) count++;
-				}
-				if (j+1 < ylength) {
-					if (realBoardArray[i][j+1].isMine()) count++;
-				}
-				if (i+1 < xlength && j+1 < ylength) {
-					if (realBoardArray[i+1][j+1].isMine()) count++;
-				}
-				realBoardArray[i][j].setMinesNear(count);
-			}
-		}
-
 	}
+	
+	public int getMinesNear(int x, int y) {
+		int count = 0;
+		
+		//check for edge of board:
+		//upper left:
+		if (isLegalMove(x-1, y-1)) {
+			if (realBoardArray[x-1][y-1].isMine()) count++;
+		}
+		//upper middle:
+		if (isLegalMove(x, y-1)) {
+			if (realBoardArray[x][y-1].isMine()) count++;
+		}
+		//you get the point:
+		if (isLegalMove(x+1, y-1)) {
+			if (realBoardArray[x+1][y-1].isMine()) count++;
+		}
+		if (isLegalMove(x-1, y)) {
+			if (realBoardArray[x-1][y].isMine()) count++;
+		}
+		if (isLegalMove(x+1, y)) {
+			if (realBoardArray[x+1][y].isMine()) count++;
+		}
+		if (isLegalMove(x-1, y+1)) {
+			if (realBoardArray[x-1][y+1].isMine()) count++;
+		}
+		if (isLegalMove(x, y+1)) {
+			if (realBoardArray[x][y+1].isMine()) count++;
+		}
+		if (isLegalMove(x+1, y+1)) {
+			if (realBoardArray[x+1][y+1].isMine()) count++;
+		}
+		return count;
+	}
+	
 	public void genMines(int numMines) {
 		int randomx = 0;
 		int randomy = 0;
@@ -146,13 +144,14 @@ public class Board extends JFrame {
 		while(!gameWon) {
 			board.printPlayerBoard();
 			
+			//scan for player's entered move:
 			System.out.println("Select an X and Y coordinate, surrounded by a space.");
 			response = scan.nextLine();
 			responses = response.split(" ");
 			xresponse = Integer.parseInt(responses[0]);
 			yresponse = Integer.parseInt(responses[1]);
-			System.out.println(responses[0] + " " + responses[1]);
-			
+						
+			//check if move is legal:
 			if (!isLegalMove(xresponse, yresponse)) {
 				System.out.println("Illegal Move: Keep your answer between 0 and " + xlength + " for the first number and 0 and " + ylength + " for the second!");
 				continue;
@@ -163,16 +162,16 @@ public class Board extends JFrame {
 				System.out.println("You already picked that square!");
 				continue;
 			}
-
+			
+			//if the player hits a mine, game over
 			if (board.realBoardArray[xresponse][yresponse].isMine()) {
 				board.playerBoardArray[xresponse][yresponse] = '*';
 				board.printPlayerBoard();
 				System.exit(0);
 			}
-			else {
-				System.out.println(board.realBoardArray[xresponse][yresponse].getMinesNear());
-				board.playerBoardArray[xresponse][yresponse] = Character.forDigit(board.realBoardArray[xresponse][yresponse].getMinesNear(), 10);
-			}
+			else board.playerBoardArray[xresponse][yresponse] = Character.forDigit(getMinesNear(xresponse, yresponse), 10);
+			
+			//check for winning condition:
 			squaresleft--;
 			if (squaresleft == 0) {
 				gameWon = true;
